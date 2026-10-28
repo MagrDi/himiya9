@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ХИМИЯ 9 — Диагностика</title>
+<style>
+:root{--bg:#fff8ef;--ink:#203044;--muted:#657184;--card:#fff;--red:#e4513d;--orange:#ffb14e;--blue:#247ba0;--green:#2c8b68;--line:#eadfd2}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#fff8ef,#f0f7fa);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:#203044;color:#fff;padding:24px 18px 28px}header .wrap,main{max-width:980px;margin:auto}.eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:.75rem;color:#ffc56e;font-weight:800}h1{font-size:clamp(1.8rem,5vw,3rem);line-height:1.08;margin:.35rem 0 .7rem}header p{max-width:690px;color:#e0e7ef;margin:0}
+main{padding:20px 14px 60px}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px}.btn{border:0;border-radius:12px;padding:11px 15px;font:inherit;font-weight:750;cursor:pointer;background:var(--red);color:#fff}.btn.secondary{background:#e9f0f4;color:var(--ink)}.btn.outline{background:#fff;color:var(--ink);border:1px solid var(--line)}.btn:focus-visible,input:focus-visible{outline:3px solid #ffbf69;outline-offset:2px}
+.panel,.question,.result{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 6px 20px #26384b0b}.panel h2{margin:0 0 6px}.muted{color:var(--muted)}.progressline{height:9px;background:#e9e3dc;border-radius:99px;overflow:hidden;margin:12px 0}.progressline span{display:block;height:100%;background:linear-gradient(90deg,var(--red),var(--orange));width:0;transition:width .2s}
+.pills{display:flex;gap:8px;flex-wrap:wrap}.pill{background:#fff0d9;color:#75491a;padding:5px 9px;border-radius:999px;font-size:.82rem;font-weight:750}
+.question h3{margin:0 0 12px;font-size:1.06rem}.qmeta{font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--blue);font-weight:800;margin-bottom:7px}.answers{display:grid;gap:8px}.answer{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1px solid var(--line);border-radius:12px;cursor:pointer;background:#fff}.answer:hover{border-color:#9bbbc9}.answer input{margin-top:5px;accent-color:var(--red)}.answer.correct{border-color:#66b79a;background:#effaf5}.answer.wrong{border-color:#e98d80;background:#fff2ef}.feedback{margin-top:12px;padding:11px 12px;border-radius:12px;background:#f2f5f8}.feedback.good{background:#eaf8f1}.feedback.bad{background:#fff0ed}.hidden{display:none!important}.result h2{margin-top:0}.score{font-size:2.6rem;line-height:1;font-weight:900;color:var(--red)}.topicrow{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}.topicrow:last-child{border-bottom:0}.bar{width:105px;height:8px;border-radius:20px;background:#eee;overflow:hidden;align-self:center;flex-shrink:0}.bar span{display:block;height:100%;background:var(--green)}footer{text-align:center;color:var(--muted);font-size:.85rem;padding:12px}
+details{margin-top:12px}summary{cursor:pointer;font-weight:800}.notice{border-left:4px solid var(--orange);padding:9px 12px;background:#fff8e9;border-radius:0 10px 10px 0}.small{font-size:.88rem}
+@media(min-width:700px){.question{padding:22px}.answers{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="eyebrow">Химия · 9 класс · модуль 0</div><h1>Проверим химическую базу</h1><p>Входная диагностика по основам курса 8-го класса. Это не экзамен и не оценка личности — нам нужно понять, что уже получается, а что стоит повторить перед углублённым курсом.</p></div></header>
+<main>
+<div class="toolbar">
+<button class="btn" id="startBtn">Начать диагностику</button>
+<button class="btn secondary" id="resumeBtn">Продолжить</button>
+<button class="btn outline" id="exportBtn">Экспорт прогресса</button>
+<label class="btn outline" for="importFile">Импорт прогресса JSON</label><input id="importFile" type="file" accept=".json,application/json" hidden>
+</div>
+<section class="panel" id="intro"><h2>Как проходить</h2><p>12 заданий · примерно 15–20 минут · один правильный ответ в каждом задании.</p><div class="pills"><span class="pill">Вещество и строение</span><span class="pill">Формулы и валентность</span><span class="pill">Реакции</span><span class="pill">Классы веществ</span><span class="pill">Расчёты</span></div><p class="notice small">Ответы и прогресс сохраняются только в этом браузере на этом устройстве. Для переноса используй экспорт JSON. В первой версии нет личного кабинета и синхронизации между устройствами.</p></section>
+<section class="panel hidden" id="quizTop"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><strong id="countLabel">Задание 1 из 12</strong><span class="muted small" id="savedLabel">Прогресс сохраняется автоматически</span></div><div class="progressline"><span id="progressFill"></span></div></section>
+<div id="questions"></div>
+<div class="toolbar hidden" id="nav"><button class="btn secondary" id="prevBtn">← Назад</button><button class="btn" id="nextBtn">Далее →</button><button class="btn outline" id="finishBtn">Завершить и увидеть результат</button></div>
+<section class="result hidden" id="result"></section>
+<section class="panel" id="lastResult"><h2>Последний результат</h2><p class="muted" id="lastText">Пока диагностика не пройдена.</p><button class="btn secondary" id="clearBtn">Сбросить сохранённый прогресс</button></section>
+<footer>Учебный прототип · версия 0.1 · авторские диагностические задания</footer>
+</main>
+<script>
+const QUESTIONS = [
+{topic:"Вещество и частицы",q:"Какое утверждение верно для чистого химического вещества?",a:["Оно всегда состоит из атомов одного элемента","Оно имеет определённый состав и характерные свойства","Его нельзя разделить химическими способами","Оно всегда состоит из молекул"],correct:1,why:"Чистое вещество характеризуется определённым составом и набором свойств. Оно может быть простым или сложным; не все вещества имеют молекулярное строение."},
+{topic:"Смеси",q:"Какой способ лучше всего подходит для отделения песка от воды?",a:["Фильтрование","Перегонка","Действие магнитом","Кристаллизация"],correct:0,why:"Нерастворимый песок задерживается фильтром, а вода проходит через него."},
+{topic:"Строение атома",q:"Какая частица атома имеет отрицательный электрический заряд?",a:["Протон","Нейтрон","Электрон","Ядро"],correct:2,why:"Электрон имеет отрицательный заряд. Протон положительный, нейтрон не имеет заряда; ядро состоит из протонов и нейтронов."},
+{topic:"Периодическая система",q:"Порядковый номер химического элемента равен числу…",a:["нейтронов в атоме","протонов в ядре","электронных слоёв","всех частиц в ядре"],correct:1,why:"Заряд ядра определяется количеством протонов; именно оно задаёт порядковый номер элемента."},
+{topic:"Химическая формула",q:"Что показывает индекс ₂ в формуле H₂O?",a:["Два атома кислорода","Два атома водорода в одной частице воды","Две молекулы воды","Заряд молекулы"],correct:1,why:"Индекс относится к символу непосредственно перед ним: в H₂O на одну молекулу приходится два атома водорода и один атом кислорода."},
+{topic:"Валентность",q:"Какова формула соединения алюминия(III) с кислородом(II)?",a:["AlO","Al₂O₃","Al₃O₂","AlO₂"],correct:1,why:"Наименьшее общее кратное валентностей 3 и 2 равно 6: нужны два атома Al и три атома O. Формула — Al₂O₃."},
+{topic:"Уравнения реакций",q:"Как правильно уравнять: H₂ + O₂ → H₂O?",a:["H₂ + O₂ → H₂O","2H₂ + O₂ → 2H₂O","H₂ + 2O₂ → H₂O","2H₂ + 2O₂ → H₂O"],correct:1,why:"Слева и справа должно быть одинаковое число атомов каждого элемента. В варианте 2H₂ + O₂ → 2H₂O с обеих сторон 4 атома H и 2 атома O."},
+{topic:"Типы реакций",q:"Какой пример иллюстрирует реакцию разложения?",a:["2Mg + O₂ → 2MgO","HCl + NaOH → NaCl + H₂O","CaCO₃ → CaO + CO₂","Fe + CuSO₄ → FeSO₄ + Cu"],correct:2,why:"При разложении из одного сложного вещества образуются два или более веществ."},
+{topic:"Оксиды",q:"Какое из веществ является оксидом?",a:["NaOH","H₂SO₄","NaCl","CO₂"],correct:3,why:"Оксиды — бинарные соединения кислорода с другим элементом. CO₂ состоит из углерода и кислорода."},
+{topic:"Кислоты и основания",q:"Какое вещество относится к основаниям?",a:["KOH","HCl","SO₃","NaCl"],correct:0,why:"KOH — гидроксид калия, растворимое основание (щёлочь). HCl — кислота, SO₃ — оксид, NaCl — соль."},
+{topic:"Масса и количество вещества",q:"Относительная молекулярная масса воды Mr(H₂O) равна… (Ar(H)=1, Ar(O)=16)",a:["17","18","16","20"],correct:1,why:"Mr(H₂O) = 2·Ar(H) + Ar(O) = 2·1 + 16 = 18."},
+{topic:"Закон сохранения массы",q:"В закрытой системе масса веществ до химической реакции…",a:["Всегда больше массы продуктов","Всегда меньше массы продуктов","Равна массе веществ после реакции","Зависит только от цвета веществ"],correct:2,why:"В закрытой системе общая масса сохраняется: атомы не исчезают и не возникают, а перегруппировываются."}
+];
+let state={started:false,index:0,answers:{},finished:false,lastScore:null};
+const $=id=>document.getElementById(id);
+function save(){localStorage.setItem("himiya9_diag_v01",JSON.stringify(state));$("savedLabel").textContent="Сохранено ✓";renderLast()}
+function load(){try{const x=JSON.parse(localStorage.getItem("himiya9_diag_v01"));if(x&&typeof x==="object"){state={...state,...x};return true}}catch(e){}return false}
+function start(){state.started=true;state.finished=false;state.index=0;state.answers={};render();save()}
+function render(){ $("intro").classList.toggle("hidden",state.started);$("quizTop").classList.toggle("hidden",!state.started||state.finished);$("nav").classList.toggle("hidden",!state.started||state.finished);$("result").classList.toggle("hidden",!state.finished);$("questions").innerHTML="";
+ if(!state.started){return}
+ if(state.finished){showResult();return}
+ const q=QUESTIONS[state.index];$("countLabel").textContent=`Задание ${state.index+1} из ${QUESTIONS.length}`;$("progressFill").style.width=`${((state.index+1)/QUESTIONS.length)*100}%`;
+ const card=document.createElement("section");card.className="question";card.innerHTML=`<div class="qmeta">${q.topic}</div><h3>${state.index+1}. ${q.q}</h3><div class="answers"></div><div class="feedback hidden"></div>`;
+ const ans=card.querySelector(".answers");q.a.forEach((t,i)=>{const lab=document.createElement("label");lab.className="answer";lab.innerHTML=`<input type="radio" name="q${state.index}" value="${i}" ${state.answers[state.index]===i?"checked":""}><span>${String.fromCharCode(65+i)}. ${t}</span>`;lab.querySelector("input").addEventListener("change",()=>{state.answers[state.index]=i;save();renderFeedback(card,q,i)});ans.appendChild(lab)});
+ $("questions").appendChild(card);if(state.answers[state.index]!==undefined)renderFeedback(card,q,state.answers[state.index]);
+ $("prevBtn").disabled=state.index===0;$("nextBtn").textContent=state.index===QUESTIONS.length-1?"К результату →":"Далее →";
+}
+function renderFeedback(card,q,i){const f=card.querySelector(".feedback");f.classList.remove("hidden","good","bad");f.classList.add(i===q.correct?"good":"bad");f.innerHTML=`<strong>${i===q.correct?"Верно!":"Пока неверно."}</strong> ${q.why}`;card.querySelectorAll(".answer").forEach((el,n)=>{el.classList.toggle("correct",n===q.correct);el.classList.toggle("wrong",n===i&&i!==q.correct)})}
+function score(){let n=0;QUESTIONS.forEach((q,i)=>{if(state.answers[i]===q.correct)n++});return n}
+function showResult(){const n=score(),pct=Math.round(n/QUESTIONS.length*100);let advice=pct>=85?"База уверенная. Можно переходить к углублённым темам, параллельно проверяя сложные расчёты.":pct>=60?"Основа частично сформирована. Перед новыми темами стоит повторить блоки с ошибками.":"Лучше начать с короткого повторения базовых понятий, формул и уравнений, затем пройти диагностику ещё раз.";
+const topics={};QUESTIONS.forEach((q,i)=>{topics[q.topic]??={ok:0,total:0};topics[q.topic].total++;if(state.answers[i]===q.correct)topics[q.topic].ok++});
+$("result").innerHTML=`<div class="qmeta">Диагностика завершена</div><div class="score">${n}/${QUESTIONS.length}</div><p><strong>${pct}% правильных ответов</strong></p><p>${advice}</p><h3>Карта тем</h3><div id="topicMap"></div><details><summary>Посмотреть разбор всех заданий</summary><div id="review"></div></details><p class="notice small">Результат — ориентир для планирования, а не школьная отметка. В этой версии оценка основана на 12 авторских заданиях и не заменяет полноценную диагностику учителя.</p><div class="toolbar"><button class="btn" id="retryBtn">Пройти заново</button><button class="btn secondary" id="exportResultBtn">Экспорт результата</button></div>`;
+$("topicMap").innerHTML=Object.entries(topics).map(([t,v])=>`<div class="topicrow"><div><strong>${t}</strong><div class="muted small">${v.ok} из ${v.total}</div></div><div class="bar"><span style="width:${v.ok/v.total*100}%"></span></div></div>`).join("");
+$("review").innerHTML=QUESTIONS.map((q,i)=>`<div class="panel"><strong>${i+1}. ${q.q}</strong><p class="small">Твой ответ: ${state.answers[i]===undefined?"нет ответа":q.a[state.answers[i]]}</p><p class="small"><strong>Правильный ответ:</strong> ${q.a[q.correct]}</p><p class="small">${q.why}</p></div>`).join("");
+$("retryBtn").onclick=start;$("exportResultBtn").onclick=exportProgress;
+state.lastScore={n,total:QUESTIONS.length,pct,date:new Date().toISOString()};save();
+}
+function renderLast(){const r=state.lastScore;$("lastText").textContent=r?`Последний результат: ${r.n}/${r.total} (${r.pct}%). Дата: ${new Date(r.date).toLocaleString("ru-RU")}.`:"Пока диагностика не пройдена."}
+function exportProgress(){const blob=new Blob([JSON.stringify({app:"Himiya9Diagnostic",version:1,exportedAt:new Date().toISOString(),state},null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="himiya9-progress.json";a.click();URL.revokeObjectURL(a.href)}
+$("startBtn").onclick=start;$("resumeBtn").onclick=()=>{if(load()){render();renderLast()}else alert("Сохранённого прогресса пока нет. Нажми «Начать диагностику».")};
+$("prevBtn").onclick=()=>{if(state.index>0){state.index--;save();render()}};
+$("nextBtn").onclick=()=>{if(state.index<QUESTIONS.length-1){state.index++;save();render()}else{state.finished=true;save();render()}};
+$("finishBtn").onclick=()=>{state.finished=true;save();render()};
+$("exportBtn").onclick=exportProgress;
+$("importFile").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const obj=JSON.parse(await f.text());if(obj.app!=="Himiya9Diagnostic"||!obj.state)throw new Error("Неверный формат");if(confirm("Импортировать сохранённый прогресс? Текущий прогресс будет заменён.")){state={...state,...obj.state};save();render()}}catch(err){alert("Не удалось импортировать файл. Выбери JSON, экспортированный из этой платформы.")}e.target.value=""};
+$("clearBtn").onclick=()=>{if(confirm("Удалить локально сохранённый прогресс?")){localStorage.removeItem("himiya9_diag_v01");state={started:false,index:0,answers:{},finished:false,lastScore:null};render();renderLast()}};
+load();render();renderLast();
+</script>
+</body>
+</html>
